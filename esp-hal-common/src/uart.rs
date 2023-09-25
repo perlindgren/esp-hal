@@ -111,11 +111,11 @@ pub mod config {
     #[cfg_attr(feature = "defmt", derive(defmt::Format))]
     pub enum StopBits {
         /// 1 stop bit
-        STOP1   = 1,
+        STOP1 = 1,
         /// 1.5 stop bits
         STOP1P5 = 2,
         /// 2 stop bits
-        STOP2   = 3,
+        STOP2 = 3,
     }
 
     /// UART configuration
@@ -403,6 +403,14 @@ where
         } else {
             Err(nb::Error::WouldBlock)
         }
+    }
+
+    /// Reset RX-FIFO-FULL interrupt
+    // TODO, maybe we can use the parenting implementation
+    pub fn reset_rx_fifo_full_interrupt(&self) {
+        T::register_block()
+            .int_clr
+            .write(|w| w.rxfifo_full_int_clr().set_bit());
     }
 }
 
@@ -1275,9 +1283,7 @@ mod asynch {
     use super::{Error, Instance};
     use crate::{
         uart::{RegisterBlock, UART_FIFO_SIZE},
-        Uart,
-        UartRx,
-        UartTx,
+        Uart, UartRx, UartTx,
     };
 
     cfg_if! {
